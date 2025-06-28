@@ -16,11 +16,10 @@
 import argparse
 import os
 import pickle
-
+import json
 import torch
 import torch.distributed
 import yaml
-
 
 
 from nnunetv2.run.load_pretrained_weights import load_pretrained_weights
@@ -198,7 +197,10 @@ def main():
     if '005' in plans_file or '004' in plans_file or '002' in plans_file or '001' in plans_file:
         resolution_index = 0
 
-    info = pickle.load(open(plans_file, "rb"))
+    plans_file = "/gpfs/home6/palfken/nnUNetFrame/nnunet_preprocessed/Dataset002_SoftTissue/nnUNetResEncUNetLPlans.json"
+
+    with open(plans_file, 'r') as f:
+        info = json.load(f)
     plan_data = {}
     plan_data["plans"] = info
     patch_size = plan_data['plans']['plans_per_stage'][resolution_index]['patch_size']
