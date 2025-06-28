@@ -21,9 +21,9 @@ import torch
 import torch.distributed
 import yaml
 
-from nnunet.paths import default_plans_identifier
-from nnunet.run.load_pretrained_weights import load_pretrained_weights
+#from nnunetv2.paths import default_plans_identifier
 
+from nnunetv2.run.load_pretrained_weights import load_pretrained_weights
 from nn_transunet.default_configuration import get_default_configuration
 
 
