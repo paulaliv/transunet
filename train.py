@@ -23,6 +23,7 @@ import yaml
 
 
 from nnunetv2.run.load_pretrained_weights import load_pretrained_weights
+from nnunetv2.utilities.plans_handling.plans_handler import PlansManager, ConfigurationManager
 
 from nn_transunet.default_configuration import get_default_configuration
 
@@ -189,6 +190,7 @@ def main():
         args.hdfs_base = network + '_' + args.model
     plans_file, output_folder_name, dataset_directory, batch_dice, stage, trainer_class = get_default_configuration(network, task, network_trainer, plans_identifier, hdfs_base=args.hdfs_base, plan_update=args.plan_update)
     resolution_index = 1
+    plans_file = "/gpfs/home6/palfken/nnUNetFrame/nnunet_preprocessed/Dataset002_SoftTissue/nnUNetResEncUNetLPlans.json"
 
     if args.config.find('500Region') != -1:
         batch_dice = True
@@ -197,13 +199,13 @@ def main():
     if '005' in plans_file or '004' in plans_file or '002' in plans_file or '001' in plans_file:
         resolution_index = 0
 
-    plans_file = "/gpfs/home6/palfken/nnUNetFrame/nnunet_preprocessed/Dataset002_SoftTissue/nnUNetResEncUNetLPlans.json"
+    pm = PlansManager(plans_file)
+    cfg = pm.get_configuration("3d_fullres")
+    patch_size = cfg.patch_size
 
-    with open(plans_file, 'r') as f:
-        info = json.load(f)
-    plan_data = {}
-    plan_data["plans"] = info
-    patch_size = plan_data['plans']['plans_per_stage'][resolution_index]['patch_size']
+    #plan_data = {}
+    #plan_data["plans"] = info
+    #patch_size = plan_data['plans']['plans_per_stage'][resolution_index]['patch_size']
     if args.crop_size is None:
         args.crop_size = patch_size
 
@@ -234,7 +236,7 @@ def main():
         model_params['init_ckpt'] = pretrained_ckpt_path
         print("###########update model_params['init_ckpt']: ", model_params['init_ckpt'])
 
-    trainer = trainer_class(plans_file, fold, local_rank=args.local_rank, output_folder=output_folder_name,
+    trainer = trainer_class(pm, fold, local_rank=args.local_rank, output_folder=output_folder_name,
                             dataset_directory=dataset_directory, batch_dice=batch_dice, stage=stage,
                             unpack_data=decompress_data, deterministic=deterministic, fp16=not fp32,
                             distribute_batch_size=args.dbs, 
